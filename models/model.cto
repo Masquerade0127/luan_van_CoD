@@ -1,0 +1,208 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+namespace org.example.cod
+
+//=====================================================================================================
+/**
+ * MODEL PARTICIPANT
+ */
+//=====================================================================================================
+participant DeliveryCompany identified by deliveryId {
+  o String deliveryId
+  o String name
+  o String description
+  o String address
+  o String number regex = /([0-9]{10,12})/
+  o String fax regex = /([0-9]{10,12})/
+}
+
+abstract participant Person identified by personId {
+  o String personId
+  o String name
+  o String number regex = /([0-9]{10,12})/
+  o String email 
+  o String location
+}
+
+participant Seller extends Person {}
+participant Buyer extends Person {}
+
+enum FirstShipper {
+  o TRUE
+  o FALSE
+}
+
+participant Shipper extends Person {
+  --> DeliveryCompany company
+  o String workingStatus
+  o FirstShipper firstShipper default = "FALSE"
+}
+
+//=====================================================================================================
+/**
+ * MODEL ASSET
+ */
+//=====================================================================================================
+enum VerifyState {
+  o NULL
+  o SUCCESSFUL
+  o FAILED
+}
+
+asset Assets identified by assetId {
+  o String assetId
+  o String name
+  o String[] detail
+  o Integer quantity
+  o Integer price
+  --> Seller seller
+}
+
+asset AssetHash identified by assetId {
+  o String assetId
+  o String orderId
+  o String hash
+  o String buyerId
+}
+
+asset SellerBalance identified by balanceId {
+  o String balanceId
+  o Integer amount
+  --> Seller owner
+}
+
+asset DeliveryBalance identified by balanceId {
+  o String balanceId
+  o Integer amount
+  --> DeliveryCompany owner
+}
+
+asset MortgageBalance identified by balanceId {
+  o String balanceId
+  o Integer amount default = 0
+  --> DeliveryCompany delivery
+  --> Seller seller
+}
+
+enum OrderState {
+  o WAITING
+  o TRANSPORTING
+  o SHIPPED
+  o CANCELED
+}
+  
+asset Package identified by orderId {
+  o String orderId
+  --> Seller seller
+  --> DeliveryCompany delivery
+  o String shipper
+  --> Buyer buyer
+  o OrderState state default = "WAITING"
+}
+  
+asset Order identified by orderId {
+  o String orderId
+  --> Seller seller
+  --> Assets[] assets
+  --> Buyer buyer
+}
+  
+asset HistoryRecordVerifyShipper identified by historyRecordId {
+  o String historyRecordId
+  o String orderId
+  o String assetId
+  o String hash
+  //o String location
+  --> Shipper shipper
+  o DateTime time
+  o VerifyState state default = "NULL"
+}
+  
+asset LimitTime identified by orderId{
+  o String orderId
+  o DateTime timeNow
+  o DateTime dealTime
+  --> Buyer buyer
+  --> DeliveryCompany delivery
+  --> Seller seller
+  --> MortgageBalance mortgage
+  --> Shipper shipper
+}
+
+//=====================================================================================================
+/**
+ * TRANSACTION
+ */
+//=====================================================================================================
+transaction trsCreateOrder {
+  o String orderId
+  --> Buyer buyerId
+  --> Assets[] assets
+}
+  
+transaction trsDeposit {
+  --> DeliveryBalance delivery
+  --> MortgageBalance mortgage
+  o Integer amountTransfer
+  o DateTime time
+}
+
+transaction trsVerifyPayment {
+  --> Buyer buyer
+  --> Shipper shipper
+  --> Order orderId
+  --> Assets[] assetId
+  o Integer payment
+}
+  
+transaction trsGetBackMoney {
+  --> LimitTime time
+}
+  
+transaction trsVerifyShipper{
+  o String historyRecordId
+  --> Package package
+  o String assetId
+  o String hash
+  o DateTime time
+  --> Shipper shipper
+}
+  
+transaction trsCreatePackage{
+  --> Order order
+  --> DeliveryCompany delivery
+}
+  
+transaction trsEncryptAsset{
+  o String sellerId
+  o String orderId
+  o String assetId
+  o String assetName
+  o String[] detail
+  o Integer quantity
+  o Integer price
+}
+  
+//=====================================================================================================
+/**
+ * TRANSACTION QUERY
+ */
+//=====================================================================================================
+transaction getAsset{
+  o String id
+}
+transaction getAsseHash{
+  o String id
+}
