@@ -1,0 +1,49 @@
+/**
+ * New query file
+ */
+
+/**
+ * query of buyer
+ */
+query selectAsset {
+  description: "select asset with id specified"
+  statement: 
+  	SELECT org.example.cod.Assets
+  		WHERE (assetId==_$id)
+}
+
+query selectAssetHash {
+  description: "select hash of asset"
+  statement:
+  	SELECT org.example.cod.AssetHash
+  		WHERE (assetId==_$id)
+}
+
+query selectOrder {
+  description: "select order with id"
+  statement:
+  	SELECT org.example.cod.Order
+  	WHERE (orderId==_$id)
+}
+
+query selectSellerAccount {
+  description: "select account of seller"
+  statement:
+  	SELECT org.example.cod.Seller
+  		WHERE (personId==_$id)
+}
+
+query selectDeliveryCompany {
+  description: "select information of delivery company"
+  statement: 
+  	SELECT org.example.cod.DeliveryCompany
+  		WHERE (deliveryId==_$id)
+}
+
+query selectShipperOfDeliveryCompany {
+  description: "select shipper of delivery company with id"
+  statement:
+  	SELECT org.example.cod.Shipper
+    	WHERE ((personId==_$shipperId) AND (company.deliveryId==_$deliveryId))
+}
+
