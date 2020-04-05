@@ -2,6 +2,9 @@
 Instructions for installing and using the COD system
 
 # INSTALLATION
+Before install this repository, make sure that you have install ***Hyperledger Composer***. Visit here to install ***Hyperledger Composer**
+https://hyperledger.github.io/composer/latest/installing/installing-index
+
 Clone this repository, open the terminal in the root directory and run the command below to Generate a business network archive
 ```
 composer archive create -t dir -n .
